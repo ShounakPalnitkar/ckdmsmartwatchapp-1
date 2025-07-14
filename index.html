@@ -6,6 +6,54 @@
     <title>Chronic Kidney Disease Prediction Tool</title>
     <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1a6fc9">
+    function showInstallPromotion() {
+  // Only show if not running in standalone mode (i.e., not already installed)
+  if (!window.matchMedia('(display-mode: standalone)').matches) {
+    // Create and show your install button
+    const installButton = document.createElement('button');
+    installButton.textContent = 'Install CKD App';
+    installButton.style.position = 'fixed';
+    installButton.style.bottom = '20px';
+    installButton.style.right = '20px';
+    installButton.style.padding = '10px 20px';
+    installButton.style.fontSize = '16px';
+    installButton.style.zIndex = 1000;
+
+    // Listen for the beforeinstallprompt event and show the button
+    window.deferredPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      window.deferredPrompt = e;
+      installButton.style.display = 'block';
+    });
+
+    installButton.style.display = 'none'; // Hide initially
+
+    installButton.addEventListener('click', async () => {
+      if (window.deferredPrompt) {
+        window.deferredPrompt.prompt();
+        const choiceResult = await window.deferredPrompt.userChoice;
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        } else {
+          console.log('User dismissed the install prompt');
+        }
+        window.deferredPrompt = null;
+        installButton.style.display = 'none';
+      }
+    });
+
+    document.body.appendChild(installButton);
+  }
+}
+
+// Call on page load
+window.addEventListener('load', () => {
+  if ('serviceWorker' in navigator && !window.matchMedia('(display-mode: standalone)').matches) {
+    showInstallPromotion();
+  }
+});
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('service-worker.js')
